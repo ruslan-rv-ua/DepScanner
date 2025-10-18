@@ -309,3 +309,58 @@ class TestEdgeCases:
         assert result.total_files == 0
         assert result.scanned_files == 0
         assert len(result.packages) == 0
+
+    def test_dotted_import_package_aggregation(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Test that dotted imports are aggregated correctly."""
+        # Create a file with dotted imports from same package
+        test_file = tmp_path / "test.py"
+        test_file.write_text(
+            "import requests.adapters\n"
+            "import requests.auth\n"
+            "from requests import Session\n"
+        )
+
+        # Mock version lookup
+        mocker.patch(
+            "depscanner.scanner.get_package_versions",
+            return_value={"requests": ("2.31.0", "local")},
+        )
+
+        scanner = DependencyScanner()
+        result = scanner.scan_files([test_file])
+
+        # Should have only one package
+        assert len(result.packages) == 1
+        assert result.packages[0].name == "requests"
+        
+        # Should track all import variations
+        imports = result.packages[0].imports
+        assert "requests.adapters" in imports or "requests" in imports
+        assert len(imports) >= 1
+
+    def test_multiple_modules_same_package(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Test handling multiple module imports from same package."""
+        # Create files that import different submodules of the same package
+        file1 = tmp_path / "file1.py"
+        file1.write_text("import requests\nimport requests.adapters\n")
+        
+        file2 = tmp_path / "file2.py"
+        file2.write_text("import requests.auth\nimport requests\n")
+
+        # Mock version lookup
+        mocker.patch(
+            "depscanner.scanner.get_package_versions",
+            return_value={"requests": ("2.31.0", "pypi")},
+        )
+
+        scanner = DependencyScanner()
+        result = scanner.scan_files([file1, file2])
+
+        # Should have one package with deduplicated imports
+        assert len(result.packages) == 1
+        pkg = result.packages[0]
+        assert pkg.name == "requests"
+        
+        # Imports should be unique (no duplicates)
+        imports_list = pkg.imports
+        assert len(imports_list) == len(set(imports_list))

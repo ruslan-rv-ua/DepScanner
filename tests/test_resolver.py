@@ -200,3 +200,45 @@ class TestEdgeCases:
         # All should be in cache
         for pkg in packages:
             assert pkg in resolver._cache
+
+    def test_resolve_from_metadata_error_handling(self) -> None:
+        """Test that _resolve_via_metadata handles errors gracefully."""
+        import unittest.mock as mock
+
+        resolver = PackageResolver()
+
+        # Test that method returns None when exception occurs
+        with mock.patch("importlib.metadata.distributions", side_effect=Exception("test error")):
+            result = resolver._resolve_via_metadata("test_package")
+            assert result is None
+
+    def test_resolve_from_metadata_with_missing_top_level(self) -> None:
+        """Test _resolve_via_metadata when top_level.txt is missing."""
+        import unittest.mock as mock
+
+        resolver = PackageResolver()
+
+        # Create a mock distribution that raises FileNotFoundError
+        mock_dist = mock.MagicMock()
+        mock_dist.read_text.side_effect = FileNotFoundError("top_level.txt not found")
+
+        with mock.patch("importlib.metadata.distributions", return_value=[mock_dist]):
+            result = resolver._resolve_via_metadata("test_package")
+            # Should return None as it continues and finds no match
+            assert result is None
+
+    def test_resolve_from_metadata_with_missing_name_key(self) -> None:
+        """Test _resolve_via_metadata when metadata lacks Name key."""
+        import unittest.mock as mock
+
+        resolver = PackageResolver()
+
+        # Create a mock distribution with top_level but missing Name in metadata
+        mock_dist = mock.MagicMock()
+        mock_dist.read_text.return_value = "test_package"
+        mock_dist.metadata = {}  # No "Name" key
+
+        with mock.patch("importlib.metadata.distributions", return_value=[mock_dist]):
+            result = resolver._resolve_via_metadata("test_package")
+            # Should return None as KeyError is caught
+            assert result is None

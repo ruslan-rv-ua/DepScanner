@@ -38,6 +38,17 @@ class TestGetLocalVersion:
             version = get_local_version(package)
             assert version is not None
 
+    def test_exception_handling(self, mocker: MockerFixture) -> None:
+        """Test that generic exceptions are handled gracefully."""
+        # Mock importlib.metadata.version to raise a generic exception
+        mocker.patch(
+            "importlib.metadata.version",
+            side_effect=RuntimeError("Unexpected error"),
+        )
+
+        version = get_local_version("test-package")
+        assert version is None
+
 
 class TestGetPyPIVersion:
     """Tests for get_pypi_version function."""
@@ -156,6 +167,19 @@ class TestGetPackageVersion:
         assert version == "2.0.0"
         assert source == "pypi"
 
+    def test_prefer_pypi_fallback_to_local(self, mocker: MockerFixture) -> None:
+        """Test prefer_local=False falls back to local if PyPI fails."""
+        # Mock PyPI to return None
+        mock_response = mocker.Mock()
+        mock_response.status_code = 404
+        mocker.patch("httpx.get", return_value=mock_response)
+
+        version, source = get_package_version("pytest", prefer_local=False)
+
+        # Should fallback to local version
+        assert version is not None
+        assert source == "local"
+
     def test_not_found_anywhere(self, mocker: MockerFixture) -> None:
         """Test package not found locally or on PyPI."""
         mock_response = mocker.Mock()
@@ -244,6 +268,19 @@ class TestCompareVersions:
 
         result = compare_versions("aaa", "bbb")
         assert result == -1
+
+    def test_string_comparison_fallback(self, mocker: MockerFixture) -> None:
+        """Test that string comparison is used when parsing fails."""
+        # Mock parse_version to raise exception
+        mocker.patch(
+            "depscanner.version.parse_version",
+            side_effect=Exception("Parse error"),
+        )
+
+        # Should use string comparison
+        assert compare_versions("1.0.0", "2.0.0") == -1
+        assert compare_versions("2.0.0", "1.0.0") == 1
+        assert compare_versions("1.0.0", "1.0.0") == 0
 
 
 class TestEdgeCases:

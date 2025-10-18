@@ -123,6 +123,17 @@ class TestParseImports:
         assert len(imports) == 1
         assert imports[0].module_name == "os"
 
+    def test_encoding_error_file(self, tmp_path: Path) -> None:
+        """Test handling of encoding errors."""
+        file_path = tmp_path / "bad_encoding.py"
+        # Write invalid UTF-8 bytes
+        file_path.write_bytes(b"import os\n# \xff\xfe invalid utf-8")
+
+        with pytest.raises(FileParsingError) as exc_info:
+            parse_imports(file_path, encoding="utf-8")
+
+        assert str(file_path) in str(exc_info.value)
+
 
 class TestExtractImportsFromAst:
     """Tests for extract_imports_from_ast function."""

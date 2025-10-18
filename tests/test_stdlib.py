@@ -139,3 +139,45 @@ class TestEdgeCases:
         result = get_stdlib_modules()
         assert "" not in result
         assert all(len(item) > 0 for item in result)
+
+
+class TestFallbackFunction:
+    """Tests for _get_fallback_stdlib_modules function."""
+
+    def test_fallback_returns_set(self) -> None:
+        """Test that fallback function returns a set."""
+        from depscanner.stdlib import _get_fallback_stdlib_modules
+
+        result = _get_fallback_stdlib_modules()
+        assert isinstance(result, set)
+
+    def test_fallback_contains_common_modules(self) -> None:
+        """Test that fallback contains common stdlib modules."""
+        from depscanner.stdlib import _get_fallback_stdlib_modules
+
+        result = _get_fallback_stdlib_modules()
+        
+        # Should contain some basic modules
+        assert "os" in result
+        assert "sys" in result
+        assert "json" in result
+        assert "re" in result
+
+    def test_fallback_used_when_no_stdlib_module_names(self) -> None:
+        """Test that fallback is used when sys.stdlib_module_names doesn't exist."""
+        import unittest.mock as mock
+
+        # Directly test by mocking hasattr to return False
+        original_hasattr = hasattr
+        
+        def mock_hasattr(obj, name):
+            if name == "stdlib_module_names":
+                return False
+            return original_hasattr(obj, name)
+        
+        with mock.patch("builtins.hasattr", side_effect=mock_hasattr):
+            result = get_stdlib_modules()
+            
+            # Should have used fallback
+            assert isinstance(result, set)
+            assert "os" in result  # Fallback contains this

@@ -72,6 +72,13 @@ class TestPackageInfo:
         assert pkg1 == pkg2
         assert pkg1 != pkg3
 
+    def test_package_equality_with_non_package(self) -> None:
+        """Test that comparing with non-PackageInfo returns NotImplemented."""
+        pkg = PackageInfo(name="requests")
+        assert pkg.__eq__("not a package") == NotImplemented
+        assert pkg.__eq__(123) == NotImplemented
+        assert pkg.__eq__(None) == NotImplemented
+
     def test_package_hash(self) -> None:
         """Test that packages can be used in sets."""
         pkg1 = PackageInfo(name="Requests")
