@@ -38,15 +38,17 @@ Options:
                           <no-pin> | e.g. Flask
     --scan-notebooks      Look for imports in jupyter notebook files.
 """
-from contextlib import contextmanager
-import os
-import sys
-import re
-import logging
+
 import ast
+import logging
+import os
+import re
+import sys
 import traceback
-from docopt import docopt
+from contextlib import contextmanager
+
 import requests
+from docopt import docopt
 from yarg import json2package
 from yarg.exceptions import HTTPError
 
@@ -87,7 +89,7 @@ def _open(filename=None, mode="r"):
         elif "w" in mode:
             file = sys.stdout
         else:
-            raise ValueError("Invalid mode for file: {}".format(mode))
+            raise ValueError(f"Invalid mode for file: {mode}")
     else:
         file = open(filename, mode)
 
@@ -98,7 +100,9 @@ def _open(filename=None, mode="r"):
             file.close()
 
 
-def get_all_imports(path, encoding="utf-8", extra_ignore_dirs=None, follow_links=True, ignore_errors=False):
+def get_all_imports(
+    path, encoding="utf-8", extra_ignore_dirs=None, follow_links=True, ignore_errors=False
+):
     imports = set()
     raw_imports = set()
     candidates = []
@@ -164,9 +168,9 @@ def get_all_imports(path, encoding="utf-8", extra_ignore_dirs=None, follow_links
         imports.add(cleaned_name)
 
     packages = imports - (set(candidates) & imports)
-    logging.debug("Found packages: {0}".format(packages))
+    logging.debug(f"Found packages: {packages}")
 
-    with open(join("stdlib"), "r") as f:
+    with open(join("stdlib")) as f:
         data = {x.strip() for x in f}
 
     return list(packages - data)
@@ -178,7 +182,7 @@ def get_file_extensions():
 
 def read_file_content(file_name: str, encoding="utf-8"):
     if file_ext_is_allowed(file_name, DEFAULT_EXTENSIONS):
-        with open(file_name, "r", encoding=encoding) as f:
+        with open(file_name, encoding=encoding) as f:
             contents = f.read()
     elif file_ext_is_allowed(file_name, [".ipynb"]) and scan_noteboooks:
         contents = ipynb_2_py(file_name, encoding=encoding)
@@ -233,10 +237,10 @@ def get_imports_info(imports, pypi_server="https://pypi.python.org/pypi/", proxy
     for item in imports:
         try:
             logging.warning(
-                'Import named "%s" not found locally. ' "Trying to resolve it at the PyPI server.",
+                'Import named "%s" not found locally. Trying to resolve it at the PyPI server.',
                 item,
             )
-            response = requests.get("{0}{1}/json".format(pypi_server, item), proxies=proxy)
+            response = requests.get(f"{pypi_server}{item}/json", proxies=proxy)
             if response.status_code == 200:
                 if hasattr(response.content, "decode"):
                     data = json2package(response.content.decode())
@@ -268,7 +272,7 @@ def get_locally_installed_packages(encoding="utf-8"):
             for item in files:
                 if "top_level" in item:
                     item = os.path.join(root, item)
-                    with open(item, "r", encoding=encoding) as f:
+                    with open(item, encoding=encoding) as f:
                         package = root.split(os.sep)[-1].split("-")
                         try:
                             top_level_modules = f.read().strip().split("\n")
@@ -317,7 +321,7 @@ def get_import_local(imports, encoding="utf-8"):
     # had to use second method instead of the previous one,
     # because we have a list in the 'exports' field
     # https://stackoverflow.com/questions/9427163/remove-duplicate-dict-in-list-in-python
-    result_unique = [i for n, i in enumerate(result) if i not in result[n + 1:]]
+    result_unique = [i for n, i in enumerate(result) if i not in result[n + 1 :]]
 
     return result_unique
 
@@ -333,7 +337,7 @@ def get_pkg_names(pkgs):
 
     """
     result = set()
-    with open(join("mapping"), "r") as f:
+    with open(join("mapping")) as f:
         data = dict(x.strip().split(":") for x in f)
     for pkg in pkgs:
         # Look up the mapped requirement. If a mapping isn't found,
@@ -380,7 +384,7 @@ def parse_requirements(file_):
     delim = ["<", ">", "=", "!", "~"]
 
     try:
-        f = open(file_, "r")
+        f = open(file_)
     except FileNotFoundError:
         print(f"File {file_} was not found. Please, fix it and run again.")
         sys.exit(1)
@@ -439,8 +443,9 @@ def diff(file_, imports):
     modules_not_imported = compare_modules(file_, imports)
 
     logging.info(
-        "The following modules are in {} but do not seem to be imported: "
-        "{}".format(file_, ", ".join(x for x in modules_not_imported))
+        "The following modules are in {} but do not seem to be imported: {}".format(
+            file_, ", ".join(x for x in modules_not_imported)
+        )
     )
 
 
@@ -458,7 +463,7 @@ def clean(file_, imports):
     try:
         f = open(file_, "r+")
     except OSError:
-        logging.error("Failed on file: {}".format(file_))
+        logging.error(f"Failed on file: {file_}")
         raise
     else:
         try:
@@ -529,7 +534,7 @@ def init(args):
         and not args["--force"]
         and os.path.exists(path)
     ):
-        logging.warning("requirements.txt already exists, " "use --force to overwrite it")
+        logging.warning("requirements.txt already exists, use --force to overwrite it")
         return
 
     candidates = get_all_imports(
@@ -567,7 +572,8 @@ def init(args):
             # aggregate all export lists into one
             # flatten the list
             # check if candidate is in exports
-            x.lower() not in [y for x in local for y in x["exports"]] and
+            x.lower() not in [y for x in local for y in x["exports"]]
+            and
             # check if candidate is package names
             x.lower() not in [x["name"] for x in local]
         ]
@@ -590,7 +596,7 @@ def init(args):
             imports, symbol = dynamic_versioning(scheme, imports)
         else:
             raise ValueError(
-                "Invalid argument for mode flag, " "use 'compat', 'gt' or 'no-pin' instead"
+                "Invalid argument for mode flag, use 'compat', 'gt' or 'no-pin' instead"
             )
     else:
         symbol = "=="

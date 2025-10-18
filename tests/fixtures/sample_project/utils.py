@@ -1,8 +1,6 @@
 """Utility functions."""
 
 import hashlib
-from datetime import datetime
-import typing
 
 
 def calculate_hash(data: str) -> str:

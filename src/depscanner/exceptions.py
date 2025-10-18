@@ -3,13 +3,13 @@
 
 class DepScannerError(Exception):
     """Base exception for all depscanner errors."""
-    
+
     pass
 
 
 class FileParsingError(DepScannerError):
     """Error parsing a Python file."""
-    
+
     def __init__(self, file_path: str, original_error: Exception):
         self.file_path = file_path
         self.original_error = original_error
@@ -18,7 +18,7 @@ class FileParsingError(DepScannerError):
 
 class InvalidPythonFileError(DepScannerError):
     """File is not a valid Python file."""
-    
+
     def __init__(self, file_path: str):
         self.file_path = file_path
         super().__init__(f"Not a valid Python file: {file_path}")
@@ -26,7 +26,7 @@ class InvalidPythonFileError(DepScannerError):
 
 class PackageResolutionError(DepScannerError):
     """Error resolving a package name."""
-    
+
     def __init__(self, module_name: str, reason: str):
         self.module_name = module_name
         self.reason = reason
@@ -35,7 +35,7 @@ class PackageResolutionError(DepScannerError):
 
 class VersionDetectionError(DepScannerError):
     """Error detecting package version."""
-    
+
     def __init__(self, package_name: str, reason: str):
         self.package_name = package_name
         self.reason = reason
@@ -44,7 +44,7 @@ class VersionDetectionError(DepScannerError):
 
 class PyPIError(DepScannerError):
     """Error communicating with PyPI."""
-    
+
     def __init__(self, package_name: str, status_code: int | None = None):
         self.package_name = package_name
         self.status_code = status_code
