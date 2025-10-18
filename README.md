@@ -13,8 +13,14 @@ Modern Python dependency scanner - a programmatic library for detecting dependen
 
 ## Installation
 
+Currently, DepScanner is only available for installation from GitHub:
+
 ```bash
-pip install depscanner
+# Using pip
+pip install git+https://github.com/your-org/depscanner.git
+
+# Using uv
+uv add git+https://github.com/your-org/depscanner.git
 ```
 
 ## Quick Start
@@ -36,6 +42,10 @@ for package in result.packages:
 ## Requirements
 
 - Python >= 3.10
+
+## Acknowledgments
+
+This project was inspired by [pipreqs](https://github.com/bndr/pipreqs), a great tool for generating requirements files. DepScanner expands on the concept by providing a comprehensive programmatic API for dependency scanning and analysis.
 
 ## License
 

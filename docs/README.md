@@ -61,15 +61,19 @@ DepScanner consists of several components:
 
 ## Installation
 
-```bash
-pip install depscanner
-```
-
-Or with uv:
+Currently, DepScanner is only available for installation from GitHub:
 
 ```bash
-uv add depscanner
+# Using pip
+pip install git+https://github.com/your-org/depscanner.git
+
+# Using uv
+uv add git+https://github.com/your-org/depscanner.git
 ```
+
+## Acknowledgments
+
+This project was inspired by [pipreqs](https://github.com/bndr/pipreqs), a great tool for generating requirements files. DepScanner expands on the concept by providing a comprehensive programmatic API for dependency scanning and analysis.
 
 ## Documentation Contents
 

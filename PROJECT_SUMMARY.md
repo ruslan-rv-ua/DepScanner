@@ -155,10 +155,13 @@ if result.errors:
 
 The project is now ready for:
 - ✅ Local development and testing
-- ✅ PyPI publication (build instructions in docs/contributing.md)
-- ✅ GitHub repository creation
+- ✅ GitHub repository usage (install via pip/uv from GitHub)
 - ✅ CI/CD integration (examples in docs/examples.md)
 - ✅ Real-world usage in projects
+
+## 🎯 Inspiration
+
+This project was inspired by [pipreqs](https://github.com/bndr/pipreqs), a great tool for generating requirements files. DepScanner expands on the concept by providing a comprehensive programmatic API for dependency scanning and analysis.
 
 ## 🔄 Git History
 

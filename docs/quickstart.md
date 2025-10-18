@@ -2,16 +2,18 @@
 
 ## Installation
 
+Currently, DepScanner is only available for installation from GitHub.
+
 Install DepScanner using pip:
 
 ```bash
-pip install depscanner
+pip install git+https://github.com/your-org/depscanner.git
 ```
 
 Or using uv:
 
 ```bash
-uv add depscanner
+uv add git+https://github.com/your-org/depscanner.git
 ```
 
 ## Basic Usage
