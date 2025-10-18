@@ -37,10 +37,10 @@ Currently, DepScanner is only available for installation from GitHub:
 
 ```bash
 # Using pip
-pip install git+https://github.com/your-org/depscanner.git
+pip install git+https://github.com/ruslan-rv-ua/depscanner.git
 
 # Using uv
-uv add git+https://github.com/your-org/depscanner.git
+uv add git+https://github.com/ruslan-rv-ua/depscanner.git
 ```
 
 ## Acknowledgments

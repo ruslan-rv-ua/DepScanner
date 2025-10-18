@@ -13,7 +13,7 @@ Thank you for your interest in contributing to DepScanner! This document provide
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/depscanner.git
+git clone https://github.com/ruslan-rv-ua/depscanner.git
 cd depscanner
 
 # Install dependencies
